@@ -1,0 +1,33 @@
+# Usage
+@HELP_TEXT@
+
+# Disclaimer on use
+This tool is not intended to fully translate all possible Esper language
+features to Apama EPL. It's intended to translate the most common Esper language
+features, either fully or partially, in order to save time in a manual
+translation project. The translation is as reliable as is possible, given the
+different semantics of Esper and Apama.
+
+For this reason, no guarantees of absolute correctness can be made. Any Apama
+EPL output by this tool should always be reviewed by a human, amended if
+necessary, and subjected to acceptance testing.
+
+Special attention should be paid to auto-generated notices in the EPL.
+* TODO:E2A - Esper code that the tool did not know how to translate.
+* WARN:E2A - EPL that was successfully translated, but not with 100% fidelity.
+
+# Known limitations
+The following language features are not currently supported by the tool.
+
+@UNSUPPORTED_FEATURES@
+
+There are many built-in types and functions supported in Esper that are not
+supported, but these are too many to enumerate.
+
+# Building the E2A tool yourself
+The Esper 2 Apama tool is built using Java 8, [xpybuild](https://github.com/xpybuild/xpybuild) and the [ANTLR 4 Java binaries](https://www.antlr.org/download.html).
+
+To build, you will need to pass the ANTLR 4 location to xpybuild. For example:
+```
+xpybuild.py ANTLR4_JAR=../antlr-4.8-complete.jar
+```
