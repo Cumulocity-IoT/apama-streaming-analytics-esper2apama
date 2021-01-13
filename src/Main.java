@@ -77,6 +77,7 @@ public class Main {
 	private static void printUsage() {
 		String usage[] = {
 			"Esper to Apama EPL translation tool",
+			"",
 			"Version " + (new Main().getClass().getPackage().getImplementationVersion()),
 			"",
 			"> e2a.bat [OPTION] ESPER_FILE [APAMA_EPL_FILE]      (on Windows)",
