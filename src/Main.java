@@ -80,6 +80,7 @@ public class Main {
 			"Version " + (new Main().getClass().getPackage().getImplementationVersion()),
 			"",
 			"> e2a.bat [OPTION] ESPER_FILE [APAMA_EPL_FILE]      (on Windows)",
+			"",
 			"> ./e2a.sh [OPTION] ESPER_FILE [APAMA_EPL_FILE]     (on Linux)",
 			"",
 			"You must be running from an Apama command prompt, or have 'java' on the path",
