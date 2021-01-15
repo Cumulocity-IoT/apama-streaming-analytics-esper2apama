@@ -1,6 +1,9 @@
 /*
- * $Copyright (c) 2020 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, and/or its subsidiaries and/or its affiliates and/or their licensors.$
- * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided for in your License Agreement with Software AG
+ * Copyright (c) 2020-2021 Software AG, Darmstadt, Germany and/or its licensors
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 package com.apama.e2a;
 
@@ -75,18 +78,19 @@ public class Main {
 	 * Print usage info for the e2a tool.
 	 */
 	private static void printUsage() {
+		// NB: this text is designed to look good on the command line AND when rendered as markdown on GitHub
 		String usage[] = {
-			"Esper to Apama EPL translation tool",
+			"Esper to Apama EPL translation tool v" + (new Main().getClass().getPackage().getImplementationVersion()),
 			"",
-			"Version " + (new Main().getClass().getPackage().getImplementationVersion()),
+			"Copyright (c) 2020-2021 Software AG, Darmstadt, Germany and/or its licensors",
+			"(see LICENSE.txt file for the license governing use of this tool)",
 			"",
-			"> e2a.bat [OPTION] ESPER_FILE [APAMA_EPL_FILE]      (on Windows)",
+			"Usage:",
+			"> e2a.bat  [OPTION] ESPER_FILE.cep [APAMA_EPL_FILE.mon]     (on Windows)",
+			"> ./e2a.sh [OPTION] ESPER_FILE.cep [APAMA_EPL_FILE.mon]     (on Linux)",
 			"",
-			"> ./e2a.sh [OPTION] ESPER_FILE [APAMA_EPL_FILE]     (on Linux)",
-			"",
-			"You must be running from an Apama command prompt, or have 'java' on the path",
-			"from the Java 8+ JRE",
-			"",
+			"You must run this tool from an Apama command prompt, or have 'java' (from a Java 8 JRE) ",
+			"on your PATH, ",
 			"",
 			"If the `APAMA_EPL_FILE` argument is specified then the resulting Apama EPL",
 			"will be written to a file in the current working directory with the specified",
@@ -94,15 +98,16 @@ public class Main {
 			"",
 			"If the `APAMA_EPL_FILE` argument is not specified, the output file will be ",
 			"written in the current working directory with the same name as the esper file,",
-			"suffixed with '.mon' - the normal extension for Apama EPL files. For example:",
+			"suffixed with `.mon` - the normal extension for Apama EPL files. For example:",
 			"",
 			"> e2a.bat MyEsper.cep",
 			"",
 			"will create a file named `MyEsper.cep.mon`",
 			"",
 			"Options:",
-			"\t--ignoreComments\tignore all comments from ESPER_FILE while translating",
-			"\t-h, --help\t\tdisplay this help and exit"
+			"",
+			"    --ignoreComments  ignore all comments from ESPER_FILE while translating",
+			"    -h, --help        display this help and exit"
 		};
 
 		for(String line : usage) {

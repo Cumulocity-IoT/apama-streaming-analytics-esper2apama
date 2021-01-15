@@ -196,6 +196,7 @@ lambda: identifier '=>' expr;
 literal
 	: stringLiteral
 	| ('-')? FLOAT
+	| ('-')? LONG
 	| ('-')? DOUBLE
 	| ('-')? INTEGER
 	| booleanLiteral
@@ -261,9 +262,9 @@ DOUBLE
 	| WHOLENUM EXPONENT
 	;
 
-FLOAT
-	: DOUBLE 'f'
-	;
+FLOAT: DOUBLE 'f';
+
+LONG: INTEGER 'l';
 
 DECIMAL
 	// Integer part, decimal point, optional exponent

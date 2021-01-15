@@ -40,35 +40,7 @@ If you...
 - Have a bug or feature request: create an [issue on our GitHub project](https://github.com/SoftwareAG/apama-streaming-analytics-esper2apama/issues)
 
 ## Command line usage
-Esper to Apama EPL translation tool v0.2
-
-Copyright (c) 2020-2021 Software AG, Darmstadt, Germany and/or its licensors
-(see LICENSE.txt file for the license governing use of this tool)
-
-Usage:
-> e2a.bat  [OPTION] ESPER_FILE.cep [APAMA_EPL_FILE.mon]     (on Windows)
-> ./e2a.sh [OPTION] ESPER_FILE.cep [APAMA_EPL_FILE.mon]     (on Linux)
-
-You must run this tool from an Apama command prompt, or have 'java' (from a Java 8 JRE) 
-on your PATH, 
-
-If the `APAMA_EPL_FILE` argument is specified then the resulting Apama EPL
-will be written to a file in the current working directory with the specified
-name.
-
-If the `APAMA_EPL_FILE` argument is not specified, the output file will be 
-written in the current working directory with the same name as the esper file,
-suffixed with `.mon` - the normal extension for Apama EPL files. For example:
-
-> e2a.bat MyEsper.cep
-
-will create a file named `MyEsper.cep.mon`
-
-Options:
-
-    --ignoreComments  ignore all comments from ESPER_FILE while translating
-    -h, --help        display this help and exit
-
+@HELP_TEXT@
 
 # Disclaimer on use
 This tool is not intended to fully translate all possible Esper language
@@ -89,29 +61,7 @@ following prefixes:
 ## Known limitations
 The following language features are not currently supported by the tool.
 
-* Many built-in annotations
-* Create window statement
-* Custom expressions
-* Select statement with context
-* Select statement using a window
-* Time literals
-* Asc/desc ordering
-* SQL-style not-equals operator
-* 'null' values
-* Lambda functions
-* Fragment paths that are not string literals
-* Extracting fragments from custom schemas
-* Not supporting filters yet
-* Cannot translate patterns
-* Cannot translate filter expressions in pattern
-* Cannot translate custom plug-in observers in pattern
-* Schemas defined as aliases to other types
-* Multiple inputs to a select statement
-* Select output throttling
-* Unidirectional keyword
-* Contained-event selection
-* Event patterns
-* Expressions in select without an 'as'
+@UNSUPPORTED_FEATURES@
 
 There are many built-in types and functions supported in Esper that are not
 supported, but these are too many to enumerate.

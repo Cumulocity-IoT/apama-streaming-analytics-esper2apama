@@ -1,6 +1,9 @@
 #!/usr/bin/env python
-# $Copyright (c) 2020 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, and/or its subsidiaries and/or its affiliates and/or their licensors.$
-# Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided for in your License Agreement with Software AG
+# This is the xpybuild build script for Esper2Apama tool (see https://xpybuild.github.io/xpybuild/ for more information)
+
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 from xpybuild.propertysupport import *
 from xpybuild.targets.custom import CustomCommand
@@ -61,13 +64,17 @@ class ReplaceReadme(FileContentsMapper):
 		return ["${OUTPUT_DIR}/e2a/help_text.txt", FindPaths("src/", includes=["*.java"])]
 
 CustomCommand("${OUTPUT_DIR}/e2a/help_text.txt",
-	command=["/bin/bash", "${OUTPUT_DIR}/e2a/e2a.sh", "--help"],
+	command=
+	["${OUTPUT_DIR}/e2a/e2a.bat", "--help"] if IS_WINDOWS else
+	["/bin/bash", "${OUTPUT_DIR}/e2a/e2a.sh", "--help"],
 	dependencies=["${OUTPUT_DIR}/e2a/e2a.sh", "${OUTPUT_DIR}/e2a/e2a.jar"],
 	redirectStdOutToTarget=True).disableInFullBuild()
 
-FilteredCopy("${OUTPUT_DIR}/e2a/README.md", "src/README.md.tmpl",
+FilteredCopy("${OUTPUT_DIR}/e2a/README.md", "./README.tmpl.md",
 	[ReplaceReadme()],
 ).disableInFullBuild()
 
 # Package up the jar, wrapper and documentation for ease of distribution
-Zip("${OUTPUT_DIR}/e2a/e2a-tool.zip", AddDestPrefix("e2a-tool/", ["${OUTPUT_DIR}/e2a/e2a.jar", "${OUTPUT_DIR}/e2a/e2a.sh", "${OUTPUT_DIR}/e2a/e2a.bat", "CHANGELOG.md", "${OUTPUT_DIR}/e2a/README.md", "LICENSE"])).tags("e2a-package").disableInFullBuild()
+Zip("${OUTPUT_DIR}/e2a/e2a-tool.zip", AddDestPrefix("e2a-tool/", [
+	"${OUTPUT_DIR}/e2a/e2a.jar", "${OUTPUT_DIR}/e2a/e2a.sh", "${OUTPUT_DIR}/e2a/e2a.bat", "CHANGELOG.md", "${OUTPUT_DIR}/e2a/README.md", 
+	"LICENSE.txt", "LICENSE.antlr4.txt"])).tags("e2a-package").disableInFullBuild()
