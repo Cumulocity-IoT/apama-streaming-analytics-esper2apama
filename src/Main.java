@@ -87,6 +87,7 @@ public class Main {
 			"",
 			"Usage:",
 			"> e2a.bat  [OPTION] ESPER_FILE.cep [APAMA_EPL_FILE.mon]     (on Windows)",
+			"",
 			"> ./e2a.sh [OPTION] ESPER_FILE.cep [APAMA_EPL_FILE.mon]     (on Linux)",
 			"",
 			"You must run this tool from an Apama command prompt, or have 'java' (from a Java 8 JRE) ",
