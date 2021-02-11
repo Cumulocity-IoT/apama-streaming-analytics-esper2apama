@@ -235,4 +235,23 @@ final class Misc {
 		// not a known mapping
 		return null;
 	}
+
+	/**
+	 * If eplout is an integer, simply add ".0" to the end. If it is already a valid
+	 * float, output it unchanged.
+	 *
+	 * If it's not a numerical literal, we don't necessarily know what type it is,
+	 * so just leave it unmolested and hope it's right.
+	 */
+	public static EPLOutput tryCastToFloat(final EPLOutput value) {
+		try {
+			Double.parseDouble(value.formatOutput()); // throws if value cannot be parsed to a number
+			if (!value.contains(".")) {
+				return value.add(".0"); // convert integer value to a float
+			}
+		} catch (NumberFormatException nfe) {
+			// Do nothing - if there a type error in the resulting EPL then PS can deal with this.
+		}
+		return value;
+	}
 }

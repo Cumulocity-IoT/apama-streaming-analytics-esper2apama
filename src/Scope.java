@@ -11,24 +11,27 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Collections;
 
-/** Immutable object describing the surrounding lexical scope of something in the syntax tree that we're currently visiting */
+/** Object describing the surrounding lexical scope of something in the syntax tree that we're currently visiting */
 class Scope {
 	public Scope(TranslateEsperFile file) {
 		this.file = file;
 	}
 
-	/** Add a variable (like a coassignment, or a local) into scope, which will be in the returned Scope */
-	public Scope addVariableToLocalScope(String name, Type type) {
-		Scope ret = this.clone();
-		ret.variables.put(name, type);
-		return ret;
+	/** Add a local variable (like a coassignment) into scope */
+	public void addVariableToLocalScope(String name, Type type) {
+		this.variables.put(name, type);
 	}
 
 	/** Create a scope nested beneath this one, for when we enter a select */
 	public Scope inSelect(TranslateUnwindowedSelectClause select) {
-		Scope ret = this.clone();
+		Scope ret = this.nested();
 		ret.select = select;
 		return ret;
+	}
+
+	/** Create a nested scope - has access to all variables in the parent scope, but any new local variables are local to this one. */
+	public Scope nested() {
+		return this.clone();
 	}
 
 	/** All variables in scope, names and types */

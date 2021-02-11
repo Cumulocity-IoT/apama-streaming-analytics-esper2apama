@@ -1,4 +1,4 @@
-# Esper to Apama EPL translation tool
+# Esper-to-Apama EPL translation tool
 
 This is an open-source tool to assist with the task of translating Esper(TM) CEL 
 files to the Event Processing Language (EPL) used by Software AG's Apama 
@@ -16,6 +16,8 @@ most commonly occurring Esper constructs. There are many Esper language
 features that the tool does not attempt to translate automatically or which 
 require human checking, and comments are added to the generated Apama EPL file 
 to flag these. See the disclaimer section below for more details. 
+
+The tool will generate EPL that works as of version 10.6.6 of the Apama microservice.
 
 # Getting started
 

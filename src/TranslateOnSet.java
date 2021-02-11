@@ -10,7 +10,7 @@ package com.apama.e2a;
 /** Handles an on ... set ... statement in esper */
 public class TranslateOnSet extends EsperBaseVisitor<EPLOutput> {
 	public TranslateOnSet(Scope scope) {
-		this.scope = scope;
+		this.scope = scope.nested();
 	}
 
 	private Scope scope;
@@ -26,7 +26,7 @@ public class TranslateOnSet extends EsperBaseVisitor<EPLOutput> {
 	public EPLOutput visitOnSet(EsperParser.OnSetContext ctx) {
 
 		EPLOutput onSetInput = visitOnSetInput(ctx.onSetInput());
-		scope = scope.addVariableToLocalScope(coassignee, inputType);
+		scope.addVariableToLocalScope(coassignee, inputType);
 		scope.getFile().addUsing(inputType);
 		scope.getFile().addChannelSubscription(inputType);
 
@@ -63,7 +63,7 @@ public class TranslateOnSet extends EsperBaseVisitor<EPLOutput> {
 
 			ret = ret.addLine("on all ").add(this.inputType.nameInEPL()).add(eventTemplate).add(" as ").add(coassignee);;
 		} else {
-			ret = EPLOutput.cannotTranslate(ctx, "Cannot translate patterns");
+			ret = EPLOutput.cannotTranslate(ctx, "Cannot translate patterns in 'on ... set'");
 		}
 		return ret;
 	}

@@ -1,4 +1,4 @@
-# Esper to Apama EPL translation tool
+# Esper-to-Apama EPL translation tool
 
 This is an open-source tool to assist with the task of translating Esper(TM) CEL 
 files to the Event Processing Language (EPL) used by Software AG's Apama 
@@ -16,6 +16,8 @@ most commonly occurring Esper constructs. There are many Esper language
 features that the tool does not attempt to translate automatically or which 
 require human checking, and comments are added to the generated Apama EPL file 
 to flag these. See the disclaimer section below for more details. 
+
+The tool will generate EPL that works as of version 10.6.6 of the Apama microservice.
 
 # Getting started
 
@@ -40,7 +42,7 @@ If you...
 - Have a bug or feature request: create an [issue on our GitHub project](https://github.com/SoftwareAG/apama-streaming-analytics-esper2apama/issues)
 
 ## Command line usage
-Esper to Apama EPL translation tool v0.2
+Esper to Apama EPL translation tool v0.3
 
 Copyright (c) 2020-2021 Software AG, Darmstadt, Germany and/or its licensors
 (see LICENSE.txt file for the license governing use of this tool)
@@ -100,18 +102,21 @@ The following language features are not currently supported by the tool.
 * SQL-style not-equals operator
 * 'null' values
 * Lambda functions
+* find... calls outside of a select statement
 * Fragment paths that are not string literals
 * Extracting fragments from custom schemas
 * Not supporting filters yet
-* Cannot translate patterns
-* Cannot translate filter expressions in pattern
-* Cannot translate custom plug-in observers in pattern
+* Cannot translate patterns in 'on ... set'
+* Patterns without a top-level 'every'
+* Patterns with a nested 'every'
+* Patterns using a 'not' operator
+* Patterns with events
+* Patterns containing timer:at
 * Schemas defined as aliases to other types
 * Multiple inputs to a select statement
 * Select output throttling
 * Unidirectional keyword
 * Contained-event selection
-* Event patterns
 * Expressions in select without an 'as'
 
 There are many built-in types and functions supported in Esper that are not

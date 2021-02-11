@@ -32,7 +32,7 @@ Jar("${OUTPUT_DIR}/e2a/e2a.jar",
 	],
 	manifest={"Main-Class":"com.apama.e2a.Main", "Implementation-Version":"${E2A_VERSION}"},
 	package=FindPaths(DirGeneratedByTarget("${OUTPUT_DIR}/e2a/antlr4-runtime-unzipped/"), includes=["**/*.class"]),
-	classpath=["${ANTLR4_JAR}"]).option("javac.options", ["-Xlint:all", "-Werror"]).tags("e2a")
+	classpath=["${ANTLR4_JAR}"]).option("javac.options", ["-Xlint:all", "-Xlint:-serial", "-Werror"]).tags("e2a")
 
 # Put our wrapper script next to the jar, exactly as it would be in an installation
 Copy("${OUTPUT_DIR}/e2a/e2a.sh", "src/e2a.sh").tags("e2a")

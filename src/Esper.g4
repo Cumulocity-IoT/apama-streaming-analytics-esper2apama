@@ -19,6 +19,7 @@ identifier
 	| 'events'
 	| 'type'
 	| 'fragments'
+	| 'min'
 	;
 
 esperFile
@@ -113,23 +114,42 @@ selectClause
 		)
 		('from'|'FROM') insertInput (',' insertInput)*
 		havingClause?
-		(('where'|'WHERE'|'Where') where=expr)?
+		whereClause?
 		insertStatementOutputThrottling?
 	;
+
+whereClause:
+	('where'|'WHERE'|'Where') condition=expr;
+
 
 havingClause: 'having' expr;
 
 insertStatementOutputThrottling: 'output' 'last'? ('every' expr|'when' 'terminated');
 
-pattern
-	: pattern operator=('and'|'AND'|'->') pattern
+pattern: 
+	every=('every'|'EVERY') pattern
 	| not=('not'|'NOT') pattern
-	| '(' pattern ')'
-	| (coassignee=identifier '=')? identifier (filterExpressionArgs=arguments)?
+	| pattern operator=('and'|'AND'|'or'|'OR'|'->') pattern
 	| 'timer' ':' 'at' timerAtArgs=arguments
-	| 'timer' ':' 'interval' timerIntervalArgs=arguments
+	| 'timer' ':' 'interval' LPAREN timerIntervalArgs=timePeriod RPAREN
+	| 'timer' ':' 'within' LPAREN timerWithinArgs=timePeriod RPAREN //TODO
+	| (coassignee=identifier '=')? eventFilter=identifier arguments?
+	| LPAREN enclosed=pattern RPAREN
+	| LBRACKET INTEGER RBRACKET pattern
+	| pattern ('until'|'UNTIL') pattern
+	| distinct=('every-distinct'|'EVERY-DISTINCT') LPAREN expr (',' expr)* (',' timePeriod)? RPAREN (coassignee=identifier '=')? identifier
+	| boundedRange pattern until=('until'|'UNTIL') pattern
+	| pattern '-' LBRACKET limitExpression=INTEGER RBRACKET '>' pattern
+	| pattern 'where' whereGuard=pattern
+	| pattern whileGuard='while' LPAREN expr RPAREN
 	| identifier ':' identifier customObserverArgs=arguments 
-	| every=('every'|'EVERY') pattern
+	;
+
+timePeriod: (amounts+=expr units+=timeUnit)+ | amount=expr;
+
+boundedRange: 
+	LBRACKET (lowEndpoint=INTEGER? ':') highEndpoint=INTEGER RBRACKET
+	| LBRACKET lowEndpoint=INTEGER (':' highEndpoint=INTEGER?) RBRACKET
 	;
 
 containedEventSelection: '[' expr ('@' 'type' '(' typeName ')')? ']';
@@ -155,7 +175,7 @@ windowargs:
 		RBRACKET
 		| RPAREN
 	)
-	| (LBRACKET | LPAREN) expr timeUnit? (RBRACKET | RPAREN)
+	| (LBRACKET | LPAREN) timePeriod (RBRACKET | RPAREN)
 	;
 	
 selectColumnExpr
@@ -176,7 +196,7 @@ expr
 	| dictionary
 	| functionCall
 	| objectForMemberCall=expr '.' functionCall
-	| expr timeUnit
+	| expr timeUnit // An 'inline' of timePeriod - unfortunately the only way to avoid mutual left-recursion of rules, forbidden in ANTLR4
 	| expr ordering=('asc'|'desc')
 	;
 
@@ -205,7 +225,17 @@ literal
 
 booleanLiteral: 'True'|'true'|'False'|'false';
 
-timeUnit: 'minutes'|'hours'|'seconds'|'minute'|'hour'|'second'|'sec'|'day'|'days'|'events';
+timeUnit: 
+	'milliseconds'|'millisecond'|'msec'
+	|'seconds'|'second'|'sec'
+	|'minutes'|'minute'|'min'
+	|'hours'|'hour'
+	|'day'|'days'
+	|'weeks'|'week'
+	|'months'|'month'
+	|'years'|'year' 
+	|'events'
+	;
 
 functionCall: memberLookup arguments;
 

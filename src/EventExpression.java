@@ -21,7 +21,7 @@ public class EventExpression {
 	/** The coassignee of the event when the listener is activated. */
 	private String coassignee = null;
 	/** The name of the event type */
-	private final String type;
+	protected final String type;
 	/** key = field name; value = constraint on field */
 	private SortedMap<String, List<Constraint>> eventFieldConstraints = new TreeMap<String, List<Constraint>>();
 
@@ -46,9 +46,8 @@ public class EventExpression {
 		this.eventFieldConstraints.clear();
 	}
 
-	/** Converts an EventExpression object to an EPLOutput object */
-	public EPLOutput toEPLOutput() {
-		EPLOutput eplOut = new EPLOutput(type).add("(");
+	protected EPLOutput constraintsToEPLOutput(boolean coassigneeReq) {
+		EPLOutput eplOut = new EPLOutput("(");
 		for (String eventField : eventFieldConstraints.keySet()) {
 			eplOut.add(eventField);
 			if (eventFieldConstraints.get(eventField).size() == 1) {
@@ -76,9 +75,15 @@ public class EventExpression {
 			}
 		}
 		eplOut.add(")");
-		if(coassignee != null){
+		if(coassigneeReq && (coassignee != null)){
 			eplOut.add(" as ").add(coassignee);
 		}
+		return eplOut;
+	}
+	/** Converts an EventExpression object to an EPLOutput object */
+	public EPLOutput toEPLOutput() {
+		EPLOutput eplOut = new EPLOutput(type);
+		eplOut.add(constraintsToEPLOutput(true));
 		return eplOut;
 	}
 
@@ -199,9 +204,9 @@ public class EventExpression {
 	 * the constraint was successfully added (can return false if the overwrite
 	 * option is false). 
 	 
-	 * TODO - if required later, we could add a 'replace' option that checks to see 
+	 * TODO - if required later, we could add a 'choose' option that checks to see 
 	 * if there is already an overlapping constraint on the field, and selects the 
-	 * constraint that is more restrictive when replace=true. E.g. If we have exisiting 
+	 * constraint that is more restrictive when choose=true. E.g. If we have exisiting 
 	 * constraint, "field > 0", and try to add new condition "field > 5", then we can
 	 * replace the first condition with the second (as the first becomes redundant). 
 	 * 

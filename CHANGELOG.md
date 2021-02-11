@@ -1,3 +1,9 @@
+# Version 0.3 - 2020-02-11
+* PAB-2037 - Patterns that contain a single timer:interval
+* PAB-2039 - Translate the findOneManagedObjectByType function
+* PAB-1998 - Do a low-effort translation of the Esper 'cast' function
+* PAB-2038 - Translate the findFirstAlarmBySourceAndStatusAndType function
+
 # Version 0.2 - 2020-01-13
 * PAB-1989 - Documentation comments in Esper are present in the translation output
 * PAB-1987 - Can use SendEmail/SendSms output streams

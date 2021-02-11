@@ -45,16 +45,18 @@ public class TranslateUnwindowedSelectClause extends EsperBaseVisitor<EPLOutput>
 		this.inputType = new Type.Unknown("???");
 
 		// Setup the listener for this statement's input
+		EPLOutput patternsEplOut = new EPLOutput();
 		if(ctx.insertInput().size() > 1) {
 			inputListenerSetupTodos = new EPLOutput();
 			for(int i = 0; i < ctx.insertInput().size(); i++) {
 				inputListenerSetupTodos.addLine(EPLOutput.cannotTranslate(ctx.insertInput().get(i), "Multiple inputs to a select statement"));
 			}
 		} else {
-			// TODO - PAB-2036/2037 Append patternsEPLOut to end of eventExpression EPLOutput
-			EPLOutput patternsEplOut = visit(ctx.insertInput().get(0));
+			// The visitInsertInput method below updates the eventExpression and inputListenerSetupTodos variables,
+			// and if a 'pattern' is matched the resulting EPLOutput is returned.
+			patternsEplOut = visit(ctx.insertInput().get(0));
 		}
-		this.scope = this.scope.addVariableToLocalScope(coassignee, inputType);
+		this.scope.addVariableToLocalScope(coassignee, inputType);
 		this.eventExpression = new EventExpression(inputType.nameInEPL().formatOutput(), coassignee);
 		scope.getFile().addUsing(inputType);
 		scope.getFile().addChannelSubscription(inputType);
@@ -66,7 +68,7 @@ public class TranslateUnwindowedSelectClause extends EsperBaseVisitor<EPLOutput>
 			String actionName = this.generateEPLDeleteUtilityAction();
 			generateOutput.add(actionName+"(").add(new TranslateExpr(this.scope).visit(ctx.selectColumnExpr(0).expr())).add(");");
 		} else {
-			scope = scope.addVariableToLocalScope(Scope.COASSIGNEE_NAME, outputType);
+			scope.addVariableToLocalScope(Scope.COASSIGNEE_NAME, outputType);
 			generateOutput.addLine(outputType.nameInEPL()).add(" " + Scope.COASSIGNEE_NAME + " := new ").add(outputType.nameInEPL()).add(";");
 
 			for(EsperParser.SelectColumnExprContext ex : ctx.selects) {
@@ -82,19 +84,26 @@ public class TranslateUnwindowedSelectClause extends EsperBaseVisitor<EPLOutput>
 		}
 
 		// Any sort of discrimination around the input before we go on to generate output
-		List<EPLOutput> nestedFiltering = new ArrayList<EPLOutput>(); 
-		if (ctx.where != null) {
-			TranslateWhereClause translateWhere = new TranslateWhereClause(scope, ctx.where, eventExpression);
+		List<EPLOutput> nestedFiltering = new ArrayList<EPLOutput>();
+		EPLOutput patternWhereTODO = new EPLOutput();
+		if (ctx.whereClause() != null) {
+			TranslateWhereClause translateWhere = new TranslateWhereClause(scope, ctx.whereClause().condition, eventExpression);
 			translateWhere.updateEventExpression();
 			// Some "where" conditions may still need to be covered in nested if
 			if (translateWhere.requiresNestedIf()) {
-				nestedFiltering.add(new EPLOutput("if (").add(translateWhere.getNestedIf()).add(")"));
-			} 
-			if(!this.asyncSetup.isEmpty()) {
-				nestedFiltering.add(this.asyncCallPreamble());
+				EPLOutput ifStatement = new EPLOutput();
+				if(ctx.insertInput(0).pattern() != null && ctx.insertInput(0).pattern().every == null) {
+					ifStatement.addWarning("This translation of the 'where' clause is only correct inside an 'on all'");
+				}
+				ifStatement.add("if (").add(translateWhere.getNestedIf()).add(")");
+				nestedFiltering.add(ifStatement);
 			}
 		}
 		nestedFiltering.add(this.filterEventsOnInputStreamType());
+
+		if(!this.asyncSetup.isEmpty()) {
+			nestedFiltering.add(this.asyncCallPreamble());
+		}
 
 		EPLOutput ret = generateOutput;
 		for(EPLOutput i : nestedFiltering) {
@@ -103,11 +112,16 @@ public class TranslateUnwindowedSelectClause extends EsperBaseVisitor<EPLOutput>
 			}
 		}
 
-		EPLOutput inputListenerSetup = new EPLOutput("on all ").add(eventExpression.toEPLOutput());
+		EPLOutput inputListenerSetup = new EPLOutput();
+		if (inputType.getEPLName().contains("???") && !patternsEplOut.isEmpty()) {
+			inputListenerSetup.add(patternsEplOut);
+		} else {
+			inputListenerSetup.add("on all ").add(eventExpression.toEPLOutput());
+		}
 		if (!this.inputListenerSetupTodos.isEmpty()) {
 			inputListenerSetup.addLine(this.inputListenerSetupTodos);
 		}
-		return inputListenerSetup.addBlock(ret);
+		return inputListenerSetup.addLine(patternWhereTODO).addBlock(ret);
 	}
 
 	/** Figure out the output type of this statement - it's usually in the 'insert into'*/
@@ -145,8 +159,8 @@ public class TranslateUnwindowedSelectClause extends EsperBaseVisitor<EPLOutput>
 		} else if (ctx.containedEventSelection() != null) {
 			inputListenerSetupTodos.addLine(EPLOutput.cannotTranslate(ctx, "Contained-event selection"));
 		} else {
-			inputListenerSetupTodos.addLine(EPLOutput.cannotTranslate(ctx, "Event patterns")); // TODO PAB-2036/2037 REMOVE THIS LINE
-			patternsEplOut.addLine(new TranslatePattern(scope).visit(ctx.pattern()));
+			TranslatePattern tp = new TranslatePattern(scope);
+			patternsEplOut.addLine(tp.visit(ctx.pattern()));
 		}
 		return patternsEplOut;
 	}
@@ -204,7 +218,9 @@ public class TranslateUnwindowedSelectClause extends EsperBaseVisitor<EPLOutput>
 	public void asyncCall(EPLOutput setup, EventExpression receive, EventExpression terminate) {
 		asyncSetup.addLine(setup).addLine(" ");
 		asyncEventExpressionReceive.add(receive);
-		asyncEventExpressionTerminate.add(terminate);
+		if(terminate != null) {
+			asyncEventExpressionTerminate.add(terminate);
+		}
 	}
 
 	/**

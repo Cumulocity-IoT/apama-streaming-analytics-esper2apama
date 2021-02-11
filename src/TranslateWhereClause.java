@@ -9,15 +9,15 @@ package com.apama.e2a;
 
 public class TranslateWhereClause extends EsperBaseVisitor<EPLOutput> {
 
-	private EsperParser.ExprContext whereCtx;
+	private EsperParser.ExprContext conditionExprCtx;
 	private EventExpression eventExpression;
 	private TranslateExpr translateExpr;
 	private Scope scope;
 	private EPLOutput nestedIfExpressionEPL = new EPLOutput();
 	
-	public TranslateWhereClause(Scope scope, EsperParser.ExprContext whereCtx, EventExpression eventExpression) {
+	public TranslateWhereClause(Scope scope, EsperParser.ExprContext condition, EventExpression eventExpression) {
 		this.scope = scope;
-		this.whereCtx = whereCtx;
+		this.conditionExprCtx = condition;
 		this.translateExpr = new TranslateExpr(scope);
 		this.eventExpression = eventExpression;
 	}
@@ -38,7 +38,7 @@ public class TranslateWhereClause extends EsperBaseVisitor<EPLOutput> {
 		// boolean operators ("and"/"or").
 		
 		// Iterate through conditions from right to left
-		EsperParser.ExprContext expressionCtx = this.whereCtx;
+		EsperParser.ExprContext expressionCtx = this.conditionExprCtx;
 		boolean isComparison = false;
 		while (expressionCtx.expr(1) != null) {
 			// Only accept conditions joined with ANDs (if where clause contains an "OR",
@@ -108,7 +108,7 @@ public class TranslateWhereClause extends EsperBaseVisitor<EPLOutput> {
 	 */
 	private void putWholeWhereClauseInNestedIf(){
 		eventExpression.clearEventFieldConstraints();
-		nestedIfExpressionEPL = new EPLOutput().add(translateExpr.visit(this.whereCtx));
+		nestedIfExpressionEPL = new EPLOutput().add(translateExpr.visit(this.conditionExprCtx));
 		stripNestedIfParentheses();
 	}
 
