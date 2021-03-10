@@ -130,7 +130,7 @@ pattern:
 	every=('every'|'EVERY') pattern
 	| not=('not'|'NOT') pattern
 	| pattern operator=('and'|'AND'|'or'|'OR'|'->') pattern
-	| 'timer' ':' 'at' timerAtArgs=arguments
+	| 'timer' ':' 'at' timerAtArgs=timerAtArguments
 	| 'timer' ':' 'interval' LPAREN timerIntervalArgs=timePeriod RPAREN
 	| 'timer' ':' 'within' LPAREN timerWithinArgs=timePeriod RPAREN //TODO
 	| (coassignee=identifier '=')? eventFilter=identifier arguments?
@@ -162,6 +162,36 @@ onSetInput
     ;
 
 arguments: LPAREN (expr (',' expr)*)? RPAREN;
+
+timerAtArguments: 	LPAREN 
+						minutes=timerAtArgument 
+					',' hours=timerAtArgument
+					',' dayOfMonth=dayOfMonthArgument
+					',' months=timerAtArgument
+					',' dayOfWeek=dayOfWeekArgument
+					(',' seconds=timerAtArgument (',' timezone=timerAtArgument)? )?
+					RPAREN;
+
+timerAtArgument:
+				expr
+			|	'*'
+			|	'*' '/' expr
+			|	expr ':' expr
+			|	'[' timerAtArgument (',' timerAtArgument)*? ']'
+			;
+
+dayOfMonthArgument:	
+					'last'
+				|	expr 'weekday'
+				|	'lastweekday'
+				|	timerAtArg=timerAtArgument
+				;
+
+dayOfWeekArgument:
+					'last'
+				|	expr 'last'
+				|	timerAtArg=timerAtArgument
+				;
 
 windowSpecifier:
 	'.' 'win:length' windowargs

@@ -28,7 +28,8 @@ public class TranslatePattern extends EsperBaseVisitor<EPLOutput>  {
 	 */
 	public EPLOutput visitPattern(EsperParser.PatternContext ctx){
 		if(ctx.every == null) {
-			return EPLOutput.cannotTranslate(ctx, "Patterns without a top-level 'every'").add(translatePattern(ctx));
+			return EPLOutput.cannotTranslate("Patterns without a top-level 'every'")
+				.add(translatePattern(ctx));
 		} else {
 			return new EPLOutput("on all ").add(translatePattern(ctx.pattern(0)));
 		}
@@ -61,8 +62,7 @@ public class TranslatePattern extends EsperBaseVisitor<EPLOutput>  {
 
 			return EPLOutput.cannotTranslate(ctx, "Patterns with events");
 		} else if(ctx.timerAtArgs != null) {
-			// TODO PAB-2036
-			return EPLOutput.cannotTranslate(ctx, "Patterns containing timer:at");
+			return translateTimerAtPattern(ctx);
 		} else if(ctx.timerIntervalArgs != null) {
 			return translateTimerIntervalPattern(ctx.timePeriod());
 		} else {
@@ -108,5 +108,41 @@ public class TranslatePattern extends EsperBaseVisitor<EPLOutput>  {
 		}
 		return new EPLOutput("wait(").add(waitInSeconds).add(")");
 	}
-}
 
+	/**
+	 * http://esper.espertech.com/release-5.4.0/esper-reference/html/event_patterns.html#pattern-timer-at
+	 * 
+	 * Translate Esper's [every] timer:at(...) to EPL's on [all] at(...).
+	 * The grammar recognises timer:at with 5-7 args.
+	 * Translating the 7th arg (timezone) is not supported because Apama EPL
+	 * doesn't have an equivalent.
+	 * Day of week and day of month keywords (last/weekday/lastweekday) are
+	 * also recognised by the grammar but not supported/translated.
+	 */
+	private EPLOutput translateTimerAtPattern(final EsperParser.PatternContext ctx) {
+		if (ctx.timerAtArguments().timezone != null) {
+			return EPLOutput.cannotTranslate(ctx,
+				"timer:at with a timezone parameter");
+		}
+
+		if (ctx.timerAtArguments().dayOfMonth.timerAtArg == null) {
+			return EPLOutput.cannotTranslate(ctx,
+				"timer:at day of month with last/weekday/lastweekday keyword");
+		}
+
+		if (ctx.timerAtArguments().dayOfWeek.timerAtArg == null) {
+			return EPLOutput.cannotTranslate(ctx,
+				"timer:at day of week with last keyword");
+		}
+
+		if (!"*".equals(ctx.timerAtArguments().dayOfWeek.getText())
+			&& !"*".equals(ctx.timerAtArguments().dayOfMonth.getText())) {
+			return EPLOutput.cannotTranslate(ctx,
+				"timer:at where both day of week and day of month parameters are specified (i.e. not wildcards)");
+		}
+
+		// timer:at args translate directly to "at" args.
+		return new EPLOutput("at").addRaw(ctx.timerAtArgs)
+			.addWarning("translated timer:at behavior may differ with DST changes");
+	}
+}

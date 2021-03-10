@@ -10,8 +10,6 @@ package com.apama.e2a;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.antlr.v4.runtime.misc.Interval;
-
 /** Handles Esper 'create schema' declarations */
 public class TranslateSchemaDecl extends EsperBaseVisitor<EPLOutput> {
 	public TranslateSchemaDecl(Scope scope) {

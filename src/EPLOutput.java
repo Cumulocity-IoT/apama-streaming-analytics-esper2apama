@@ -89,10 +89,24 @@ public class EPLOutput {
 		return this;
 	}
 
-	/** Append to the current line */
+	/**
+	 * Append to the current line
+	 * (whitespace not preserved by design)
+	 */
 	public EPLOutput add(ParserRuleContext ctx) {
 		clearSem();
 		return this.add(new EPLOutput(ctx));
+	}
+
+	/**
+	 * Append raw input to the current line
+	 * (whitespace preserved)
+	 * Use with caution because the input whitespace is not guaranteed to be
+	 * well placed.
+	 */
+	public EPLOutput addRaw(ParserRuleContext ctx) {
+		clearSem();
+		return this.add(new EPLOutput(getFullText(ctx)));
 	}
 
 	/** Append to the current line */
@@ -192,9 +206,7 @@ public class EPLOutput {
 	 * The 'reason' should be appropriate to go in an auto-generated README under a list of language features we don't support.
 	 * */
 	public static EPLOutput cannotTranslate(ParserRuleContext ctx, String reason, boolean blockComments) {
-		int start = ctx.start.getStartIndex();
-		int stop = ctx.stop.getStopIndex();
-		String[] lines = ctx.start.getInputStream().getText(new Interval(start, stop)).split("[\\r\\n]+");
+		String[] lines = getFullText(ctx).split("[\\r\\n]+");
 
 		if(lines.length == 1 && lines[0].length() < 60) {
 			return new EPLOutput().addLine((blockComments ? "/**" : "//") + " " +
@@ -286,6 +298,25 @@ public class EPLOutput {
 		} else {
 			this.exprType = new Type.Unknown("");
 		}
+	}
+
+	/**
+	 * Get the full input text from a context.
+	 * Useful for preserving whitespace from the input, for example when
+	 * dealing with an array or list of parameters.
+	 * 
+	 * @param context the context to get the full text for.
+	 * @return the full input text.
+	 */
+	private static String getFullText(ParserRuleContext context) {
+		if (context.start == null || context.stop == null 
+			|| context.start.getStartIndex() < 0
+			|| context.stop.getStopIndex() < 0)
+			return context.getText();
+	
+		return context.start.getInputStream().getText(
+			Interval.of(context.start.getStartIndex(),
+						context.stop.getStopIndex()));
 	}
 
 	/** @see setExprType */

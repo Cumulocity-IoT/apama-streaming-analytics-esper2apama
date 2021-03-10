@@ -42,7 +42,7 @@ If you...
 - Have a bug or feature request: create an [issue on our GitHub project](https://github.com/SoftwareAG/apama-streaming-analytics-esper2apama/issues)
 
 ## Command line usage
-Esper to Apama EPL translation tool v0.3
+Esper to Apama EPL translation tool v0.4
 
 Copyright (c) 2020-2021 Software AG, Darmstadt, Germany and/or its licensors
 (see LICENSE.txt file for the license governing use of this tool)
@@ -111,7 +111,6 @@ The following language features are not currently supported by the tool.
 * Patterns with a nested 'every'
 * Patterns using a 'not' operator
 * Patterns with events
-* Patterns containing timer:at
 * Schemas defined as aliases to other types
 * Multiple inputs to a select statement
 * Select output throttling

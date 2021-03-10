@@ -1,3 +1,6 @@
+# Version 0.4 - 2020-03-10
+* PAB-2036 - Patterns consisting of a single every timer:at
+
 # Version 0.3 - 2020-02-11
 * PAB-2037 - Patterns that contain a single timer:interval
 * PAB-2039 - Translate the findOneManagedObjectByType function
