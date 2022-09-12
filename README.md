@@ -30,7 +30,7 @@ The tool will generate EPL that works as of version 10.6.6 of the Apama microser
 
 ## Help and resources
 During migration you will want to refer to:
-- The [Apama documentation](http://www.apamacommunity.com/docs), especially 
+- The [Apama documentation](https://www.apamacommunity.com/docs), especially 
   the *User Guide* which explains the Apama EPL language itself, and 
   the *API Reference for EPL* which is where you'll find reference information 
   about the event definitions used for interacting with Cumulocity IoT from EPL. 
@@ -42,7 +42,7 @@ If you...
 - Have a bug or feature request: create an [issue on our GitHub project](https://github.com/SoftwareAG/apama-streaming-analytics-esper2apama/issues)
 
 ## Command line usage
-Esper to Apama EPL translation tool v0.4
+Esper to Apama EPL translation tool v0.5
 
 Copyright (c) 2020-2021 Software AG, Darmstadt, Germany and/or its licensors
 (see LICENSE.txt file for the license governing use of this tool)

@@ -30,7 +30,7 @@ The tool will generate EPL that works as of version 10.6.6 of the Apama microser
 
 ## Help and resources
 During migration you will want to refer to:
-- The [Apama documentation](http://www.apamacommunity.com/docs), especially 
+- The [Apama documentation](https://www.apamacommunity.com/docs), especially 
   the *User Guide* which explains the Apama EPL language itself, and 
   the *API Reference for EPL* which is where you'll find reference information 
   about the event definitions used for interacting with Cumulocity IoT from EPL. 

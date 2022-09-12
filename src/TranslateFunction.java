@@ -214,12 +214,18 @@ public class TranslateFunction extends EsperBaseVisitor<EPLOutput> {
 			addLine("integer " + reqName + "_req := Util.generateReqId();").
 			addLine("send FindManagedObject(" + reqName + "_req, ").
 				add(new TranslateExpr(scope).visit(ctx.arguments().expr(0))).
-				add(", new dictionary<string, string>) to FindManagedObject.SEND_CHANNEL;");
+				add(", new dictionary<string, string>) to FindManagedObject.SEND_CHANNEL;").
+				addLine();
+
 		EventExpression receive = new EventExpression("FindManagedObjectResponse", reqName);
 		receive.addConstraint("reqId", "=", reqName + "_req");
 		EventExpression terminate = new EventExpression("FindManagedObjectResponseAck");
 		terminate.addConstraint("reqId", "=", reqName + "_req");
-		scope.getSelect().asyncCall(asyncBit, receive, terminate);
+		asyncBit.
+			addLine("on ").add(receive.toEPLOutput()).
+			addLine("   and not ").add(terminate.toEPLOutput());
+
+		scope.getSelect().asyncCall(asyncBit);
 		return new EPLOutput(reqName).add(".managedObject").setExprType(Type.getByEsperName("ManagedObjectCreated"));
 	}
 
@@ -236,12 +242,18 @@ public class TranslateFunction extends EsperBaseVisitor<EPLOutput> {
 				add("{\"source\":").add(translateExpr.visit(ctx.arguments().expr(0))).
 				add(", \"status\":").add(translateExpr.visit(ctx.arguments().expr(1))).
 				add(", \"type\":").add(translateExpr.visit(ctx.arguments().expr(2))).
-				add("}) to FindAlarm.SEND_CHANNEL;");
+				add("}) to FindAlarm.SEND_CHANNEL;").
+				addLine();
+
 		EventExpression receive = new EventExpression("FindAlarmResponse", reqName);
 		receive.addConstraint("reqId", "=", reqName + "_req");
 		EventExpression terminate = new EventExpression("FindAlarmResponseAck");
 		terminate.addConstraint("reqId", "=", reqName + "_req");
-		scope.getSelect().asyncCall(asyncBit, receive, terminate);
+		asyncBit.
+			addLine("on ").add(receive.toEPLOutput()).
+			addLine("   and not ").add(terminate.toEPLOutput());
+
+		scope.getSelect().asyncCall(asyncBit);
 		return new EPLOutput(reqName).add(".alarm").setExprType(Type.getByEsperName("AlarmCreated"));
 	}
 
@@ -257,18 +269,25 @@ public class TranslateFunction extends EsperBaseVisitor<EPLOutput> {
 			addLine("FindManagedObject " + fmo + " := new FindManagedObject;").
 			addLine(fmo + ".reqId := " + reqName +"_req;").
 			addLine(fmo + ".params[\"type\"] := " + (new TranslateExpr(scope).visit(ctx.arguments().expr(0))).formatOutput() +";").
-			addLine("send " + fmo + " to FindManagedObject.SEND_CHANNEL;");
+			addLine("send " + fmo + " to FindManagedObject.SEND_CHANNEL;").
+			addLine();
+
 		EventExpression receive = new EventExpression("FindManagedObjectResponse", reqName);
 		receive.addConstraint("reqId", "=", reqName + "_req");
 		EventExpression terminate = new EventExpression("FindManagedObjectResponseAck");
 		terminate.addConstraint("reqId", "=", reqName + "_req");
-		scope.getSelect().asyncCall(asyncBit, receive, terminate);
+		asyncBit.
+			addLine("on ").add(receive.toEPLOutput()).
+			addLine("   and not ").add(terminate.toEPLOutput());
+
+		scope.getSelect().asyncCall(asyncBit);
 		return new EPLOutput(reqName).add(".managedObject").setExprType(Type.getByEsperName("ManagedObjectCreated"));
 	}
 
 	/** Translates a call to findOneManagedObjectByType. Uses TranslateUnwindowedSelectClause.asyncCall to generate a use of the FindManagedObject event protocol. */
 	private EPLOutput findOneManagedObjectByType(EsperParser.FunctionCallContext ctx) {
 		addUsingAndChannelSubscription("ManagedObject");
+
 		String reqName = scope.getFile().uniqueVarName("fmo");
 		String fmo = scope.getFile().uniqueVarName("fmo");
 		EPLOutput asyncBit = new EPLOutput();
@@ -277,12 +296,18 @@ public class TranslateFunction extends EsperBaseVisitor<EPLOutput> {
 			addLine("FindManagedObject " + fmo + " := new FindManagedObject;").
 			addLine(fmo + ".reqId := " + reqName +"_req;").
 			addLine(fmo + ".params[\"type\"] := " + (new TranslateExpr(scope).visit(ctx.arguments().expr(0))).formatOutput() +";").
-			addLine("send " + fmo + " to FindManagedObject.SEND_CHANNEL;");
-		EventExpression receive = new FindOneEventExpression("FindManagedObjectResponse", reqName);
+			addLine("send " + fmo + " to FindManagedObject.SEND_CHANNEL;").
+			addLine();
+
+		EventExpression receive = new EventExpression("FindManagedObjectResponse", reqName);
 		receive.addConstraint("reqId", "=", reqName + "_req");
-		if(scope.getSelect()!=null) {
-			scope.getSelect().asyncCall(asyncBit, receive, null);
-		}
+		EventExpression terminate = new EventExpression("FindManagedObjectResponseAck");
+		terminate.addConstraint("reqId", "=", reqName + "_req");
+		asyncBit.
+			addLine("on ((").add(receive.toEPLOutput()).add(" and not ").add(terminate.toEPLOutput()).add(") -> ").
+			addLine("   (").add(terminate.toEPLOutput()).add(" and not ").add(receive.toEPLOutput()).add("))");
+
+		scope.getSelect().asyncCall(asyncBit);
 		return new EPLOutput(reqName).add(".managedObject").setExprType(Type.getByEsperName("ManagedObjectCreated"));
 	}
 

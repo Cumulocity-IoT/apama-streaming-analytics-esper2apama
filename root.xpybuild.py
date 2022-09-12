@@ -17,7 +17,7 @@ definePropertiesFromFile('build.properties')
 
 # Auto-generated parser/visitor classes based on our Esper antlr grammar
 CustomCommand("${OUTPUT_DIR}/e2a/antlr4-output/",
-	command=[os.getenv("APAMA_COMMON_JRE") + "/../bin/java", "-jar", "${ANTLR4_JAR}", "-visitor", "-o", "${OUTPUT_DIR}/e2a/antlr4-output/", "src/Esper.g4"],
+	command=[os.getenv("APAMA_COMMON_JRE") + "/bin/java", "-jar", "${ANTLR4_JAR}", "-visitor", "-o", "${OUTPUT_DIR}/e2a/antlr4-output/", "src/Esper.g4"],
 	dependencies=["src/Esper.g4"],
 	cwd=".")
 

@@ -1,3 +1,7 @@
+# Version 0.5 - 2020-09-12
+* PAB-3332 - Fixed a bug in which some find* functions translated to EPL containing a rare race condition
+* PAB-2369 - Fixed a bug in the tool could not handle a first line consisting of ';'
+
 # Version 0.4 - 2020-03-10
 * PAB-2036 - Patterns consisting of a single every timer:at
 

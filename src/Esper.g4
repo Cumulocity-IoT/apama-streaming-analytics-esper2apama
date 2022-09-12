@@ -23,7 +23,7 @@ identifier
 	;
 
 esperFile
-	: moduleDecl? statement* EOF
+	: ';'* moduleDecl? statement* EOF
 	;
 
 moduleDecl

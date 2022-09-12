@@ -76,9 +76,7 @@ public class TranslateUnwindowedSelectClause extends EsperBaseVisitor<EPLOutput>
 			}
 			generateOutput.addLine(outputType.howToSend());
 		}
-		if(!this.asyncSetup.isEmpty()) {
-			generateOutput = this.asyncCallPreamble().addBlock(generateOutput);
-		}
+		generateOutput = this.wrapAsyncConsumer(generateOutput);
 		if(ctx.insertStatementOutputThrottling() != null) {
 			generateOutput = generateOutput.addLine(EPLOutput.cannotTranslate(ctx.insertStatementOutputThrottling(), "Select output throttling"));
 		}
@@ -101,16 +99,13 @@ public class TranslateUnwindowedSelectClause extends EsperBaseVisitor<EPLOutput>
 		}
 		nestedFiltering.add(this.filterEventsOnInputStreamType());
 
-		if(!this.asyncSetup.isEmpty()) {
-			nestedFiltering.add(this.asyncCallPreamble());
-		}
-
 		EPLOutput ret = generateOutput;
 		for(EPLOutput i : nestedFiltering) {
 			if(!i.isEmpty()) {
 				ret = i.addBlock(ret);
 			}
 		}
+		ret = this.wrapAsyncConsumer(ret);
 
 		EPLOutput inputListenerSetup = new EPLOutput();
 		if (inputType.getEPLName().contains("???") && !patternsEplOut.isEmpty()) {
@@ -211,58 +206,30 @@ public class TranslateUnwindowedSelectClause extends EsperBaseVisitor<EPLOutput>
 
 	/**
 	 * Called for an expression inside this statement to say that it needs an asynchronous call (via event protocol) before it's evaluated.
-	 * @param setup EPL to run before the expressions are evaluated. Usually a send/route to initiate the asynchronous call.
-	 * @param receive The partial event expression that receives the result of the asynchronous call.
-	 * @param terminate The partial event expression that means we're done with all receiving (usually an ack).
+	 * For example, findFirstAlarm... functions need to turn into a send FindManagedObject, on FindManagedObjectResponse, ...
+	 * The expression to be evaluated will (later) be nested inside this listener.
+	 *
+	 * @param epl EPL to set this up, ending with an event expression ('on', but no trigger '{...}')
 	 */
-	public void asyncCall(EPLOutput setup, EventExpression receive, EventExpression terminate) {
-		asyncSetup.addLine(setup).addLine(" ");
-		asyncEventExpressionReceive.add(receive);
-		if(terminate != null) {
-			asyncEventExpressionTerminate.add(terminate);
-		}
+	public void asyncCall(EPLOutput epl) {
+		asyncBits.add(epl);
 	}
 
 	/**
-	 * Using what went into asyncCall, generated the code to send the events, and an event listener that triggers when they're all done.
-	 * Clears whatever went into asyncCall, so we're ready to start again with another completely unrelated expression in this statement e.g. the where clause.
+	 * Given some code that (might) make use of the output of asynchronous calls (see asyncCall), returns that code wrapped in the necessary event expression(s), if any.
+	 * Clears out all asyncCalls that have been previously made, ready for the next (potentially disjoint) expression in this select clause.
 	 */
-	private EPLOutput asyncCallPreamble() {
-		assert(!this.asyncSetup.isEmpty());
-		EPLOutput ret = new EPLOutput();
-		ret.add(this.asyncSetup);
-		ret.addLine("on ");
-		for(int i = 0; i < this.asyncEventExpressionReceive.size(); i++) {
-			ret.add(this.asyncEventExpressionReceive.get(i).toEPLOutput());
-			if(i != this.asyncEventExpressionReceive.size() - 1) {
-				ret.add(" and ").addLine("   ");
-			}
+	public EPLOutput wrapAsyncConsumer(EPLOutput asyncConsumer) {
+		EPLOutput ret = asyncConsumer;
+		for(EPLOutput e : asyncBits) {
+			ret = e.addBlock(ret);
 		}
-		if(!this.asyncEventExpressionTerminate.isEmpty()) {
-			ret.add(" and not");
-			ret.add(this.asyncEventExpressionTerminate.size() == 1 ? new EPLOutput(" ") : new EPLOutput("(").addLine("       "));
-			for(int i = 0; i < this.asyncEventExpressionTerminate.size(); i++) {
-				ret.add(this.asyncEventExpressionTerminate.get(i).toEPLOutput());
-				if(i != this.asyncEventExpressionTerminate.size() - 1) {
-					ret.add(" and ").addLine("       ");
-				}
-			}
-			ret.add(this.asyncEventExpressionTerminate.size() == 1 ? "" : ")");
-		}
-
-		// Reset async call state so the next asyncCall starts with a fresh slate
-		this.asyncSetup = new EPLOutput();
-		this.asyncEventExpressionReceive = new ArrayList<EventExpression>();
-		this.asyncEventExpressionTerminate = new ArrayList<EventExpression>();
+		asyncBits.clear();
 		return ret;
 	}
 
 	/** Used by asyncCall */
-	private EPLOutput asyncSetup = new EPLOutput();
-
-	/** Used by asyncCall */
-	private List<EventExpression> asyncEventExpressionReceive = new ArrayList<EventExpression>(); 
-	private List<EventExpression> asyncEventExpressionTerminate = new ArrayList<EventExpression>();
+	private List<EPLOutput> asyncBits = new ArrayList<EPLOutput>(); 
 	
 	/** Check if we are creating or updating object in C8Y.
 	Esper has two separate input streams for Created/Updated. 
