@@ -8,7 +8,7 @@ Software AG ended support for using CEL (Esper) in Cumulocity IoT on
 31 Dec 2020 following its deprecation in 2018. Cumulocity IoT now uses Apama to 
 provide streaming analytics. Existing customers using CEL must migrate to 
 Apama. For details on migration, refer to Migrating from CEL (Esper) to Apama 
-in the [Streaming Analytics guide](https://cumulocity.com/guides/apama/overview-analytics/#migrate-from-esper).
+in the [Streaming Analytics guide](https://cumulocity.com/guides/10.14.0/apama/overview-analytics/#migrate-from-esper).
 
 This tool focuses on reducing (but not eliminating!) the amount of human 
 involvement needed during migration by automating translation of some of the 
@@ -35,7 +35,7 @@ During migration you will want to refer to:
   the *API Reference for EPL* which is where you'll find reference information 
   about the event definitions used for interacting with Cumulocity IoT from EPL. 
 - The [Apama in Cumulocity documentation](https://cumulocity.com/guides/apama/overview-analytics/), 
-  including the [migration guide](https://cumulocity.com/guides/apama/overview-analytics/#migrate-from-esper).
+  including the [migration guide](https://cumulocity.com/guides/10.14.0/apama/overview-analytics/#migrate-from-esper).
 
 If you...
 - Have a question: ask it on the [Apama community on Stack Overflow](https://stackoverflow.com/questions/ask?tags=apama)
